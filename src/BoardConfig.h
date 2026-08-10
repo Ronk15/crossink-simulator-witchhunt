@@ -51,16 +51,21 @@ enum class Board {
   Sticky,
 };
 
+enum class DisplayController : uint8_t {
+  SSD1677, UC8253, UC8279, UC8179, ED2208, LgfxEpd, IT8951
+};
+
 struct BoardProfile {
   Board board;
   const char *name;
+  DisplayController displayController = DisplayController::SSD1677;
 };
 
-inline constexpr BoardProfile XTEINK_X4 = {Board::XteinkX4, "xteink_x4"};
-inline constexpr BoardProfile XTEINK_X3 = {Board::XteinkX3, "xteink_x3"};
+inline constexpr BoardProfile XTEINK_X4 = {Board::XteinkX4, "xteink_x4", DisplayController::SSD1677};
+inline constexpr BoardProfile XTEINK_X3 = {Board::XteinkX3, "xteink_x3", DisplayController::UC8253};
 inline constexpr BoardProfile XTEINK_X4_PRO = {Board::XteinkX4Pro,
-                                               "xteink_x4_pro"};
-inline constexpr BoardProfile STICKY = {Board::Sticky, "sticky"};
+                                               "xteink_x4_pro", DisplayController::SSD1677};
+inline constexpr BoardProfile STICKY = {Board::Sticky, "sticky", DisplayController::SSD1677};
 
 #if defined(SIMULATOR_DEVICE_STICKY)
 inline BoardProfile ACTIVE = STICKY;

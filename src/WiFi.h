@@ -37,6 +37,7 @@ enum wifi_sort_method_t {
 
 #define WIFI_MODE_STA WIFI_STA
 #define WIFI_MODE_AP WIFI_AP
+#define WIFI_MODE_APSTA WIFI_AP_STA
 
 class IPAddress {
   uint8_t bytes[4] = {0, 0, 0, 0};

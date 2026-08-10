@@ -16,6 +16,7 @@ class String {
 public:
   std::string s;
   String() {}
+  void clear() { s.clear(); }
   String(const char *str) : s(str ? str : "") {}
   explicit String(const std::string &str) : s(str) {}
   String(uint16_t num) : s(std::to_string(num)) {}

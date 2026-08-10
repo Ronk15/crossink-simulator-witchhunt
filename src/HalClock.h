@@ -44,6 +44,9 @@ public:
   }
   static void applyTimezone(int) {}
   static void wifiOff(bool = false) {}
+  static void restore() {}
+  static void saveBeforeSleep(bool = false) {}
+  static void updatePeriodic() {}
   // Version estatica que espera Witchhunt (alli HalClock es un namespace).
   static void formatTime(char* buf, size_t bufSize, bool use24h) {
     if (!buf || !bufSize) return;

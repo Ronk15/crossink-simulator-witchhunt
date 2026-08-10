@@ -58,6 +58,10 @@ public:
   bool openFileForWrite(const char *moduleName, const String &path,
                         HalFile &file);
   bool removeDir(const char *path);
+  // Tamanos de la "SD" simulada: es una carpeta del disco anfitrion.
+  uint64_t sdTotalBytes() { return 32ull * 1024 * 1024 * 1024; }
+  uint64_t sdUsedBytes() { return 1ull * 1024 * 1024 * 1024; }
+  uint64_t sdFreeBytes() { return 31ull * 1024 * 1024 * 1024; }
   // Copia byte a byte para firmware derivado de Witchhunt.
   bool copyFile(const char* mod, const std::string& from, const std::string& to);
 
