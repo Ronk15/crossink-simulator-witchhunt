@@ -90,15 +90,22 @@ public:
   bool getFastGrayscaleLut() const { return false; }
 
   void releaseBuffers() {}
-  bool hasSecondaryBuffer() const { return false; }
-  uint8_t* borrowSecondaryBuffer(size_t*) const { return nullptr; }
-  bool returnSecondaryBuffer() const { return false; }
+  // En escritorio hay memoria de sobra: se concede un buffer secundario real
+  // para que el firmware no interprete el fallo como fragmentacion y se
+  // reinicie (ruta maybeRestartForFragmentedHeap).
+  bool hasSecondaryBuffer() const { return true; }
+  uint8_t* borrowSecondaryBuffer(size_t* size) const {
+    static std::vector<uint8_t> buf(BUFFER_SIZE);
+    if (size) *size = buf.size();
+    return buf.data();
+  }
+  bool returnSecondaryBuffer() const { return true; }
   void setSingleBufferFastDiff(bool) const {}
   void cleanupGrayscaleWithPreviousBuffer() const {}
   void syncRedRamFromFrameBuffer() const {}
   void syncWriteBufferFromActive() const {}
-  bool releaseSecondaryBuffer() const { return false; }
-  bool reallocSecondaryBuffer() const { return false; }
+  bool releaseSecondaryBuffer() const { return true; }
+  bool reallocSecondaryBuffer() const { return true; }
 
   void displayGrayscaleBase(RefreshMode fallback = HALF_REFRESH,
                             bool turnOffScreen = false);
