@@ -47,6 +47,16 @@ public:
   bool supportsAsyncRefresh() const;
   bool supportsAsyncGrayscaleBase() const;
   void displayWindow(int x, int y, int w, int h);
+  void displayWindow(int x, int y, int w, int h, bool turnOffScreen) {
+    (void)turnOffScreen;
+    displayWindow(x, y, w, h);
+  }
+  void triggerDisplay(RefreshMode mode = FAST_REFRESH, bool turnOffScreen = false) {
+    displayBuffer(mode, turnOffScreen);
+  }
+  void triggerDisplayAsync(RefreshMode mode = FAST_REFRESH, bool turnOffScreen = false) {
+    displayBuffer(mode, turnOffScreen);
+  }
   void refreshDisplay(RefreshMode mode = RefreshMode::FAST_REFRESH,
                       bool turnOffScreen = false);
 
@@ -84,6 +94,8 @@ public:
   uint8_t* borrowSecondaryBuffer(size_t*) const { return nullptr; }
   bool returnSecondaryBuffer() const { return false; }
   void setSingleBufferFastDiff(bool) const {}
+  void cleanupGrayscaleWithPreviousBuffer() const {}
+  void syncRedRamFromFrameBuffer() const {}
   void syncWriteBufferFromActive() const {}
   bool releaseSecondaryBuffer() const { return false; }
   bool reallocSecondaryBuffer() const { return false; }

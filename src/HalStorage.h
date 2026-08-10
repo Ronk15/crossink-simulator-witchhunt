@@ -118,6 +118,8 @@ public:
   // Stub para firmware derivado de Witchhunt: fecha FAT de modificacion.
   // El escritorio no la expone por esta via; mtime queda en cero.
   bool getModifyDateTime(uint16_t*, uint16_t*) const { return false; }
+  bool getCreateDateTime(uint16_t*, uint16_t*) const { return false; }
+  uint64_t size64() { return (uint64_t)fileSize(); }
   operator bool() const;
 };
 

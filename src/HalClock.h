@@ -35,6 +35,7 @@ public:
   // Stubs para firmware derivado de Witchhunt: en escritorio la hora del
   // sistema siempre está disponible, no hay RTC que sincronizar.
   static bool isSynced() { return true; }
+  static bool isApproximate() { return false; }
   static uint64_t now() { return static_cast<uint64_t>(::time(nullptr)); }
   static uint64_t lastSyncTime() { return static_cast<uint64_t>(::time(nullptr)); }
   static bool syncNtp(const char* = nullptr) { return true; }
@@ -47,6 +48,13 @@ public:
   static void restore() {}
   static void saveBeforeSleep(bool = false) {}
   static void applyClientTime(time_t) {}
+  static void formatLogTime(char* buf, size_t bufSize) {
+    if (!buf || !bufSize) return;
+    const time_t t = ::time(nullptr);
+    struct tm lt;
+    localtime_r(&t, &lt);
+    strftime(buf, bufSize, "%H:%M:%S", &lt);
+  }
   static void updatePeriodic() {}
   // Version estatica que espera Witchhunt (alli HalClock es un namespace).
   static void formatTime(char* buf, size_t bufSize, bool use24h) {

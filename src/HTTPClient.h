@@ -48,15 +48,16 @@ public:
   ~HTTPClient() {}
 
   void begin(NetworkClient &client, const char *url) {
-  bool begin(NetworkClient &client, const String &url) {
-    begin(client, url.c_str());
-    return true;
-  }
     (void)client;
     url_ = url ? url : "";
     responseBody_.s.clear();
     responseStream_.reset();
     statusCode_ = 0;
+  }
+  // Sobrecarga que devuelve bool, como espera el firmware de Witchhunt.
+  bool begin(NetworkClient &client, const String &url) {
+    begin(client, url.c_str());
+    return true;
   }
   void setFollowRedirects(int mode) { (void)mode; }
   // Sin portal cautivo en escritorio: nunca hay cabecera Location.
@@ -80,6 +81,9 @@ public:
   int GET() { return perform("GET", nullptr); }
   int POST() { return perform("POST", ""); }
   int POST(const char *body) { return perform("POST", body ? body : ""); }
+  int sendRequest(const char *method, const char *body) {
+    return perform(method ? method : "GET", body ? body : "");
+  }
   int PUT(const char *body) { return perform("PUT", body ? body : ""); }
   int PUT(const String &body) { return perform("PUT", body.c_str()); }
 
