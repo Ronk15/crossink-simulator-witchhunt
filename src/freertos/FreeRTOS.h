@@ -25,8 +25,21 @@ typedef SimPortMux portMUX_TYPE;
   {                                                                            \
   }
 
-inline void taskENTER_CRITICAL(portMUX_TYPE *mux) { mux->mtx.lock(); }
-inline void taskEXIT_CRITICAL(portMUX_TYPE *mux) { mux->mtx.unlock(); }
+// Witchhunt pasa nullptr a proposito: en el C3, de un solo nucleo, eso
+// deshabilita interrupciones sin spinlock y es valido en el IDF. En el
+// escritorio se respalda con un mutex global compartido.
+inline std::recursive_mutex &simGlobalCriticalMutex() {
+  static std::recursive_mutex m;
+  return m;
+}
+inline void taskENTER_CRITICAL(portMUX_TYPE *mux) {
+  if (mux) mux->mtx.lock();
+  else simGlobalCriticalMutex().lock();
+}
+inline void taskEXIT_CRITICAL(portMUX_TYPE *mux) {
+  if (mux) mux->mtx.unlock();
+  else simGlobalCriticalMutex().unlock();
+}
 #define portENTER_CRITICAL(mux) taskENTER_CRITICAL(mux)
 #define portEXIT_CRITICAL(mux) taskEXIT_CRITICAL(mux)
 

@@ -111,8 +111,8 @@ public:
   };
 
   bool hasPendingInput() const { return wasAnyPressed(); }
-  bool popButtonEdge(ButtonEdge&) const { return false; }
-  void flushButtonEdges() const {}
+  bool popButtonEdge(ButtonEdge &out) const;
+  void flushButtonEdges() const;
   // El escritorio no tiene muestreador en segundo plano ni botones fisicos.
   bool isHeldNow(uint8_t) const { return false; }
   void waitForStablePowerRelease() {}

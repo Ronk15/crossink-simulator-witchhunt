@@ -54,6 +54,21 @@ static bool pressedThisFrame[NUM_BUTTONS] = {};
 static bool releasedThisFrame[NUM_BUTTONS] = {};
 static unsigned long buttonPressTime[NUM_BUTTONS] = {};
 static bool syntheticButtonDown[NUM_BUTTONS] = {};
+
+// Cola FIFO de flancos para firmware derivado de Witchhunt. En el dispositivo
+// la llena un muestreador en segundo plano; aqui se alimenta desde el mismo
+// punto donde se detectan los flancos de SDL.
+#include <deque>
+static std::deque<HalGPIO::ButtonEdge> edgeQueue;
+static void pushEdge(int btn, bool pressed) {
+  if (btn < 0 || btn >= NUM_BUTTONS) return;
+  if (edgeQueue.size() > 64) edgeQueue.pop_front();
+  HalGPIO::ButtonEdge ev;
+  ev.button = (uint8_t)btn;
+  ev.pressed = pressed;
+  ev.timeMs = SDL_GetTicks();
+  edgeQueue.push_back(ev);
+}
 static bool simulatorSleepRequested = false;
 
 namespace {
@@ -524,6 +539,7 @@ void HalGPIO::update() {
       if (btn >= 0) {
         pressedThisFrame[btn] = true;
         buttonPressTime[btn] = SDL_GetTicks();
+        pushEdge(btn, true);
       }
     } else if (e.type == SDL_KEYUP) {
       if (e.key.keysym.scancode == HOME_KEY_SCANCODE) {
@@ -533,6 +549,7 @@ void HalGPIO::update() {
       int btn = scancodeToButton(e.key.keysym.scancode);
       if (btn >= 0) {
         releasedThisFrame[btn] = true;
+        pushEdge(btn, false);
       }
     } else if (e.type == SDL_MOUSEBUTTONDOWN &&
                e.button.button == SDL_BUTTON_LEFT) {
@@ -739,3 +756,13 @@ void HalGPIO::startDeepSleep() {
   }
 }
 HalGPIO gpio;
+
+// Consumo de la cola de flancos (firmware derivado de Witchhunt).
+bool HalGPIO::popButtonEdge(ButtonEdge &out) const {
+  if (edgeQueue.empty()) return false;
+  out = edgeQueue.front();
+  edgeQueue.pop_front();
+  return true;
+}
+
+void HalGPIO::flushButtonEdges() const { edgeQueue.clear(); }

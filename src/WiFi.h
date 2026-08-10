@@ -1,4 +1,6 @@
 #pragma once
+
+#include <functional>
 #include "NetworkClient.h"
 #include "WString.h"
 
@@ -14,6 +16,7 @@
 using WiFiClient = NetworkClient;
 
 enum wl_status_t {
+  WL_CONNECTION_LOST = 90,
   WL_IDLE_STATUS = 0,
   WL_NO_SSID_AVAIL = 1,
   WL_CONNECTED = 3,
@@ -64,7 +67,20 @@ public:
   bool operator!=(const IPAddress &o) const { return !(*this == o); }
 };
 
+// Tipos del sistema de eventos de WiFi (Arduino-ESP32).
+enum WiFiEvent_t {
+  ARDUINO_EVENT_WIFI_STA_CONNECTED = 4,
+  ARDUINO_EVENT_WIFI_STA_DISCONNECTED = 5,
+  ARDUINO_EVENT_WIFI_STA_GOT_IP = 7,
+};
+struct WiFiEventInfo_t {
+  int dummy = 0;
+};
+typedef void (*WiFiEventCb)(WiFiEvent_t);
+typedef std::function<void(WiFiEvent_t, WiFiEventInfo_t)> WiFiEventFuncCb;
+
 class WiFiClass {
+  uint16_t eventIdSeq_ = 0;
   struct Network {
     String ssid;
     int32_t rssi;
@@ -167,6 +183,25 @@ class WiFiClass {
   }
 
 public:
+
+  // Sistema de eventos: onEvent guarda la retrollamada y begin() la dispara,
+  // porque en escritorio no hay radio que emita eventos por su cuenta.
+  std::vector<std::pair<int, WiFiEventFuncCb>> eventCbs_;
+  uint16_t eventIdSeq2_ = 0;
+  uint16_t onEvent(WiFiEventFuncCb cb, int evt = 0) {
+    eventCbs_.push_back({evt, cb});
+    return ++eventIdSeq2_;
+  }
+  void fireEvent(WiFiEvent_t evt) {
+    WiFiEventInfo_t info;
+    for (auto &pr : eventCbs_)
+      if (pr.first == (int)evt && pr.second) pr.second(evt, info);
+  }
+  void simulateConnectEvents() {
+    fireEvent(ARDUINO_EVENT_WIFI_STA_CONNECTED);
+    fireEvent(ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  }
+
   wl_status_t begin(const char *ssid = nullptr, const char *pass = nullptr) {
     (void)pass;
     currentMode = WIFI_STA;
@@ -191,6 +226,7 @@ public:
       return currentStatus;
     }
     currentStatus = WL_CONNECTED;
+    simulateConnectEvents();
     return currentStatus;
   }
   wl_status_t status() { return currentStatus; }
@@ -209,6 +245,17 @@ public:
     return currentStatus == WL_CONNECTED ? IPAddress(127, 0, 0, 1) : IPAddress();
   }
   bool softAPConfig(IPAddress, IPAddress, IPAddress) { return true; }
+  // Stubs de red para firmware derivado de Witchhunt.
+  bool config(IPAddress, IPAddress, IPAddress, IPAddress) { return true; }
+  // Sistema de eventos de WiFi: en escritorio no hay radio que emita eventos,
+  // asi que onEvent registra y devuelve un id que removeEvent ignora.
+  uint16_t onEvent(WiFiEventCb, int = 0) { return ++eventIdSeq_; }
+  void removeEvent(uint16_t) {}
+  wl_status_t begin(const char *ssid, const char *pass, int32_t channel,
+                    const uint8_t *bssid, bool connect = true) {
+    (void)channel; (void)bssid; (void)connect;
+    return begin(ssid, pass);
+  }
   void persistent(bool) {}
   bool disconnect(bool wifioff = false, bool eraseap = false,
                   unsigned long timeout = 0) {

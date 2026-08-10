@@ -47,12 +47,13 @@ public:
   HTTPClient() {}
   ~HTTPClient() {}
 
-  void begin(NetworkClient &client, const char *url) {
+  bool begin(NetworkClient &client, const char *url) {
     (void)client;
     url_ = url ? url : "";
     responseBody_.s.clear();
     responseStream_.reset();
     statusCode_ = 0;
+    return true;
   }
   // Sobrecarga que devuelve bool, como espera el firmware de Witchhunt.
   bool begin(NetworkClient &client, const String &url) {
