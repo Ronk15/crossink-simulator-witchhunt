@@ -65,3 +65,28 @@ static inline void heap_caps_free(void* p) { free(p); }
 
 static inline void heap_caps_dump(uint32_t caps) { (void)caps; }
 static inline void heap_caps_dump_all(void) {}
+
+// Sonda de bloques del heap (PR #124 de Witchhunt). En escritorio no hay
+// un asignador que inspeccionar: se reportan cifras coherentes y estables
+// para que las trazas de fragmentacion no acusen un problema inexistente.
+typedef struct {
+  size_t total_free_bytes;
+  size_t total_allocated_bytes;
+  size_t largest_free_block;
+  size_t minimum_free_bytes;
+  size_t allocated_blocks;
+  size_t free_blocks;
+  size_t total_blocks;
+} multi_heap_info_t;
+
+static inline void heap_caps_get_info(multi_heap_info_t *info, uint32_t caps) {
+  (void)caps;
+  if (!info) return;
+  info->total_free_bytes = 4u * 1024u * 1024u;
+  info->total_allocated_bytes = 1u * 1024u * 1024u;
+  info->largest_free_block = 2u * 1024u * 1024u;
+  info->minimum_free_bytes = 4u * 1024u * 1024u;
+  info->allocated_blocks = 100;
+  info->free_blocks = 4;
+  info->total_blocks = 104;
+}
