@@ -63,6 +63,27 @@ public:
   uint16_t getDisplayHeight() const;
   uint16_t getDisplayWidthBytes() const;
   uint32_t getBufferSize() const;
+  // --- Stubs para firmware derivado de Witchhunt ---
+  // El escritorio no tiene panel e-ink: el refresco es instantáneo,
+  // no hay planos RED ni buffer secundario que prestar.
+  bool deviceIsX3() const { return false; }
+
+  void finishDisplayAsync() const {}
+  void completeDisplay() const {}
+  bool isRefreshPending() const { return false; }
+  bool isRedRamSynced() const { return true; }
+
+  RefreshMode getLastRefreshMode() const { return RefreshMode::FAST_REFRESH; }
+  uint8_t getLastDisplayModeByte() const { return 0x0C; }
+
+  void setFastGrayscaleLut(bool) const {}
+  bool getFastGrayscaleLut() const { return false; }
+
+  void releaseBuffers() {}
+  bool hasSecondaryBuffer() const { return false; }
+  uint8_t* borrowSecondaryBuffer(size_t*) const { return nullptr; }
+  bool returnSecondaryBuffer() const { return false; }
+  void setSingleBufferFastDiff(bool) const {}
 
   void displayGrayscaleBase(RefreshMode fallback = HALF_REFRESH,
                             bool turnOffScreen = false);
