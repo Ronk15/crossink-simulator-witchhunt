@@ -197,6 +197,17 @@ public:
     return currentStatus == WL_CONNECTED ? IPAddress(127, 0, 0, 1)
                                          : IPAddress();
   }
+  // Stubs de diagnostico de red para firmware derivado de Witchhunt.
+  IPAddress gatewayIP() {
+    return currentStatus == WL_CONNECTED ? IPAddress(127, 0, 0, 1) : IPAddress();
+  }
+  IPAddress subnetMask() {
+    return currentStatus == WL_CONNECTED ? IPAddress(255, 0, 0, 0) : IPAddress();
+  }
+  IPAddress dnsIP(uint8_t = 0) {
+    return currentStatus == WL_CONNECTED ? IPAddress(127, 0, 0, 1) : IPAddress();
+  }
+  bool softAPConfig(IPAddress, IPAddress, IPAddress) { return true; }
   void persistent(bool) {}
   bool disconnect(bool wifioff = false, bool eraseap = false,
                   unsigned long timeout = 0) {

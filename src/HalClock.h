@@ -36,6 +36,10 @@ public:
   // sistema siempre está disponible, no hay RTC que sincronizar.
   static bool isSynced() { return true; }
   static uint64_t now() { return static_cast<uint64_t>(::time(nullptr)); }
+  static uint64_t lastSyncTime() { return static_cast<uint64_t>(::time(nullptr)); }
+  static bool syncNtp(const char* = nullptr) { return true; }
+  static void applyTimezone(int) {}
+  static void wifiOff() {}
 
   bool getTime(uint8_t &hour, uint8_t &minute) const;
   bool getDateTime(uint16_t &year, uint8_t &month, uint8_t &day, uint8_t &hour,
