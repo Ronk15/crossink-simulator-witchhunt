@@ -23,7 +23,7 @@ class NetworkClient;
 #define HTTPC_ERROR_STREAM_WRITE        (-10)
 #define HTTPC_ERROR_READ_TIMEOUT        (-11)
 
-enum { HTTPC_STRICT_FOLLOW_REDIRECTS, HTTP_CODE_OK = 200 };
+enum { HTTPC_STRICT_FOLLOW_REDIRECTS, HTTPC_DISABLE_FOLLOW_REDIRECTS, HTTPC_FORCE_FOLLOW_REDIRECTS, HTTP_CODE_OK = 200 };
 
 inline int simCurlExitCodeToHttpError(int curlExitCode) {
   switch (curlExitCode) {
@@ -48,6 +48,10 @@ public:
   ~HTTPClient() {}
 
   void begin(NetworkClient &client, const char *url) {
+  bool begin(NetworkClient &client, const String &url) {
+    begin(client, url.c_str());
+    return true;
+  }
     (void)client;
     url_ = url ? url : "";
     responseBody_.s.clear();
@@ -55,6 +59,8 @@ public:
     statusCode_ = 0;
   }
   void setFollowRedirects(int mode) { (void)mode; }
+  // Sin portal cautivo en escritorio: nunca hay cabecera Location.
+  String getLocation() { return String(); }
   void setReuse(bool reuse) { (void)reuse; }
   void setConnectTimeout(int32_t timeout) { (void)timeout; }
   void setTimeout(uint16_t timeout) { (void)timeout; }

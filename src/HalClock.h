@@ -38,8 +38,20 @@ public:
   static uint64_t now() { return static_cast<uint64_t>(::time(nullptr)); }
   static uint64_t lastSyncTime() { return static_cast<uint64_t>(::time(nullptr)); }
   static bool syncNtp(const char* = nullptr) { return true; }
+  static bool syncNtp(char* errBuf, size_t errLen, const char* = nullptr) {
+    if (errBuf && errLen) errBuf[0] = 0;
+    return true;
+  }
   static void applyTimezone(int) {}
-  static void wifiOff() {}
+  static void wifiOff(bool = false) {}
+  // Version estatica que espera Witchhunt (alli HalClock es un namespace).
+  static void formatTime(char* buf, size_t bufSize, bool use24h) {
+    if (!buf || !bufSize) return;
+    const time_t t = ::time(nullptr);
+    struct tm lt;
+    localtime_r(&t, &lt);
+    strftime(buf, bufSize, use24h ? "%H:%M" : "%I:%M %p", &lt);
+  }
 
   bool getTime(uint8_t &hour, uint8_t &minute) const;
   bool getDateTime(uint16_t &year, uint8_t &month, uint8_t &day, uint8_t &hour,

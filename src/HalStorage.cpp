@@ -478,3 +478,20 @@ std::vector<String> HalStorage::listFiles(const char *path, int maxFiles) {
   closedir(dir);
   return result;
 }
+
+// Copia byte a byte para firmware derivado de Witchhunt.
+bool HalStorage::copyFile(const char *mod, const std::string &from,
+                          const std::string &to) {
+  (void)mod;
+  HalFile src = open(from.c_str(), O_RDONLY);
+  if (!src) return false;
+  HalFile dst = open(to.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+  if (!dst) return false;
+  char buf[1024];
+  int n;
+  while ((n = src.read(buf, sizeof(buf))) > 0) {
+    if (dst.write(buf, (size_t)n) != (size_t)n) return false;
+  }
+  dst.sync();
+  return true;
+}

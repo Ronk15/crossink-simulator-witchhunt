@@ -58,6 +58,8 @@ public:
   bool openFileForWrite(const char *moduleName, const String &path,
                         HalFile &file);
   bool removeDir(const char *path);
+  // Copia byte a byte para firmware derivado de Witchhunt.
+  bool copyFile(const char* mod, const std::string& from, const std::string& to);
 
   static HalStorage &getInstance() { return instance; }
 
