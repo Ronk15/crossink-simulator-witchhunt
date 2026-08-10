@@ -17,6 +17,13 @@ public:
   std::string s;
   String() {}
   void clear() { s.clear(); }
+  bool equalsIgnoreCase(const String &o) const {
+    if (s.size() != o.s.size()) return false;
+    for (size_t i = 0; i < s.size(); ++i)
+      if (::tolower((unsigned char)s[i]) != ::tolower((unsigned char)o.s[i])) return false;
+    return true;
+  }
+  bool equalsIgnoreCase(const char *o) const { return equalsIgnoreCase(String(o)); }
   String(const char *str) : s(str ? str : "") {}
   explicit String(const std::string &str) : s(str) {}
   String(uint16_t num) : s(std::to_string(num)) {}

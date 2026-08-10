@@ -46,6 +46,7 @@ public:
   static void wifiOff(bool = false) {}
   static void restore() {}
   static void saveBeforeSleep(bool = false) {}
+  static void applyClientTime(time_t) {}
   static void updatePeriodic() {}
   // Version estatica que espera Witchhunt (alli HalClock es un namespace).
   static void formatTime(char* buf, size_t bufSize, bool use24h) {
