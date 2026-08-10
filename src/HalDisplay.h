@@ -84,6 +84,9 @@ public:
   uint8_t* borrowSecondaryBuffer(size_t*) const { return nullptr; }
   bool returnSecondaryBuffer() const { return false; }
   void setSingleBufferFastDiff(bool) const {}
+  void syncWriteBufferFromActive() const {}
+  bool releaseSecondaryBuffer() const { return false; }
+  bool reallocSecondaryBuffer() const { return false; }
 
   void displayGrayscaleBase(RefreshMode fallback = HALF_REFRESH,
                             bool turnOffScreen = false);

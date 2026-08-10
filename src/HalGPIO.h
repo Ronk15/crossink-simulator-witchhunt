@@ -101,6 +101,21 @@ public:
 
   WakeupReason getWakeupReason() const;
 
+// --- Cola de flancos para firmware derivado de Witchhunt ---
+  // El shim del simulador entrega entrada por sondeo (wasPressed/beginFrame).
+  // Witchhunt agrega encima una cola FIFO que llena un muestreador en segundo
+  // plano. En escritorio no existe ese muestreador, así que la cola va siempre
+  // vacía y ButtonEventManager cae a su ruta por sondeo.
+  struct ButtonEdge {
+    uint8_t button;
+    bool pressed;
+    unsigned long timeMs;
+  };
+
+  bool hasPendingInput() const { return wasAnyPressed(); }
+  bool popButtonEdge(ButtonEdge&) const { return false; }
+  void flushButtonEdges() const {}
+
   // Button indices
   static constexpr uint8_t BTN_BACK = 0;
   static constexpr uint8_t BTN_CONFIRM = 1;

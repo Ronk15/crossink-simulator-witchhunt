@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-
+#include <ctime>
 #include <cstddef>
 #include <cstdint>
 
@@ -15,6 +15,7 @@ class HalClock {
   bool _available = false;
 
 public:
+  bool getModifyDateTime(uint16_t*, uint16_t*) const { return false; }
   enum DateFormat : uint8_t {
     MONTH_DAY_YEAR_LONG = 0,
     DAY_MONTH_YEAR_LONG = 1,
@@ -30,6 +31,12 @@ public:
 
   void begin();
   bool isAvailable() const { return _available; }
+
+  // Stubs para firmware derivado de Witchhunt: en escritorio la hora del
+  // sistema siempre está disponible, no hay RTC que sincronizar.
+  static bool isSynced() { return true; }
+  static uint64_t now() { return static_cast<uint64_t>(::time(nullptr)); }
+
   bool getTime(uint8_t &hour, uint8_t &minute) const;
   bool getDateTime(uint16_t &year, uint8_t &month, uint8_t &day, uint8_t &hour,
                    uint8_t &minute) const;

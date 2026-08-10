@@ -109,6 +109,9 @@ public:
   bool close();
   HalFile openNextFile();
   bool isOpen() const;
+  // Stub para firmware derivado de Witchhunt: fecha FAT de modificacion.
+  // El escritorio no la expone por esta via; mtime queda en cero.
+  bool getModifyDateTime(uint16_t*, uint16_t*) const { return false; }
   operator bool() const;
 };
 

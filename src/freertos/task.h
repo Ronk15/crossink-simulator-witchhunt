@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 
 // Thread-local pointer so ulTaskNotifyTake can find the current task's handle.
+
 inline thread_local SimTaskHandle *tl_currentTaskHandle = nullptr;
 
 inline SimTaskHandle *simMainTaskHandle() {
@@ -69,6 +70,11 @@ inline uint32_t ulTaskNotifyTake(int /*clearOnExit*/,
   h->cv.wait(lk, [h] { return h->notifyCount > 0; });
   h->notifyCount--;
   return 1;
+}
+// Stub para firmware derivado de Witchhunt: sin contención de tareas de render
+// en escritorio, ningún repintado se considera obsoleto.
+inline uint32_t ulTaskNotifyValueClear(void* /*task*/, uint32_t /*bits*/) {
+  return 0;
 }
 
 // Wake a task by incrementing its notification counter and signalling its
