@@ -24,6 +24,44 @@ public:
   static constexpr int LOW_POWER_FREQ = 10;                   // MHz
   static constexpr unsigned long IDLE_POWER_SAVING_MS = 3000; // ms
 
+  // Escalonado de reposo del firmware. Los valores se replican del HAL real
+  // porque main.cpp los lee directamente para decidir la rama de reposo.
+  static constexpr unsigned long IDLE_DOWNCLOCK_MS = 500;
+  static constexpr unsigned long IDLE_LIGHT_SLEEP_MS = 1000;
+
+  // Contadores de sueño ligero que muestra Información del sistema. En
+  // escritorio solo se mueve `attempts`: la rama de reposo se alcanza igual que
+  // en el dispositivo, pero nunca se duerme.
+  struct LightSleepStats {
+    uint32_t attempts = 0;
+    uint32_t slept = 0;
+    uint32_t sleptMs = 0;
+    uint32_t awakeMs = 0;
+    uint32_t wakeTimer = 0;
+    uint32_t wakeGpio = 0;
+    uint32_t rejLock = 0;
+    uint32_t rejWifi = 0;
+    uint32_t rejUsb = 0;
+    uint32_t rejFrontlight = 0;
+    uint32_t rejDebounce = 0;
+    uint32_t rejIdf = 0;
+  };
+
+private:
+  LightSleepStats lightSleepStats_;
+
+public:
+  // SIEMPRE declina. No hay sueño ligero en escritorio, y el simulador depende
+  // del delay() de reserva del llamante para seguir cediendo el hilo: si esto
+  // devolviera true, el bucle principal giraría sin ceder y la ventana SDL
+  // dejaría de responder a las teclas.
+  bool lightSleep(const HalGPIO & /*gpio*/) {
+    lightSleepStats_.attempts++;
+    return false;
+  }
+
+  const LightSleepStats &lightSleepStats() const { return lightSleepStats_; }
+
   void begin();
 
   // Control CPU frequency for power saving

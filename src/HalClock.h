@@ -43,6 +43,9 @@ public:
     if (errBuf && errLen) errBuf[0] = 0;
     return true;
   }
+  // El escritorio no duerme: no hay sueño profundo del que despertar, así que
+  // la duración del último es siempre cero (lo mismo que en un arranque en frío).
+  static uint32_t lastSleepSeconds() { return 0; }
   static void applyTimezone(int) {}
   static void wifiOff(bool = false) {}
   static void restore() {}
