@@ -67,6 +67,11 @@ public:
   // Control CPU frequency for power saving
   void setPowerSaving(bool enabled);
 
+  // En el C3 la radio necesita >=80 MHz, y esto limpia a la vez isLowPower y el
+  // flag de espera de forma de onda antes de subir la frecuencia. En escritorio
+  // no hay frecuencia que subir; se deja el flag coherente por si algo lo lee.
+  void ensureFullSpeedForRadio() { isLowPower = false; }
+
   // Setup wake up GPIO and enter deep sleep
   // Should be called inside main loop() to handle the currentLockMode
   void startDeepSleep(HalGPIO &gpio, bool keepLpAlive = false) const;

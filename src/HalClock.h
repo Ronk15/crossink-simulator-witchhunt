@@ -59,6 +59,11 @@ public:
     strftime(buf, bufSize, "%H:%M:%S", &lt);
   }
   static void updatePeriodic() {}
+  // En el dispositivo esto verifica que el reloj sea plausible antes de un
+  // handshake TLS, y sincroniza por NTP si no lo es: un certificado no se puede
+  // validar con una fecha absurda. En escritorio la hora del sistema ya es
+  // correcta, asi que siempre es usable y no hay nada que sincronizar.
+  static bool ensureUsableForTls(const char* = nullptr) { return true; }
   // Version estatica que espera Witchhunt (alli HalClock es un namespace).
   static void formatTime(char* buf, size_t bufSize, bool use24h) {
     if (!buf || !bufSize) return;

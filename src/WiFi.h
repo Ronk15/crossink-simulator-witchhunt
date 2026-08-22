@@ -3,6 +3,7 @@
 #include <functional>
 #include "NetworkClient.h"
 #include "WString.h"
+#include "esp_err.h"  // esp_err_t / ESP_OK, para el stub de parametros de escaneo
 
 #include <array>
 #include <cstdlib>
@@ -69,12 +70,23 @@ public:
 
 // Tipos del sistema de eventos de WiFi (Arduino-ESP32).
 enum WiFiEvent_t {
+  ARDUINO_EVENT_WIFI_STA_START = 2,
   ARDUINO_EVENT_WIFI_STA_CONNECTED = 4,
   ARDUINO_EVENT_WIFI_STA_DISCONNECTED = 5,
   ARDUINO_EVENT_WIFI_STA_GOT_IP = 7,
 };
+// Codigos de razon de desconexion del IDF. Solo se declara el tipo: el
+// simulador nunca genera una desconexion espontanea, asi que el valor solo
+// viaja hasta disconnectReasonName() de abajo.
+typedef int wifi_err_reason_t;
 struct WiFiEventInfo_t {
   int dummy = 0;
+  // El union real del IDF trae un miembro por tipo de evento. Aqui solo existe
+  // el que lee el firmware, y siempre en cero: sin desconexiones simuladas no
+  // hay razon que reportar.
+  struct {
+    uint8_t reason = 0;
+  } wifi_sta_disconnected;
 };
 typedef void (*WiFiEventCb)(WiFiEvent_t);
 typedef std::function<void(WiFiEvent_t, WiFiEventInfo_t)> WiFiEventFuncCb;
@@ -350,8 +362,25 @@ public:
   int32_t channel() { return currentStatus == WL_CONNECTED ? 1 : 0; }
   String getHostname() { return String("crosspoint-simulator"); }
   int softAPgetStationNum() { return 0; }
+  // Solo se usa para registrar por que fallo una asociacion. El simulador no
+  // desconecta por su cuenta, asi que este texto no deberia aparecer nunca.
+  const char *disconnectReasonName(wifi_err_reason_t) { return "SIMULATOR"; }
 };
 extern WiFiClass WiFi;
+
+// Presupuesto de escaneo: en el dispositivo acorta el tiempo por canal para que
+// un escaneo no bloquee la UI. En escritorio la lista de redes es sintetica y
+// vuelve al instante, asi que los parametros se aceptan y se ignoran.
+struct wifi_scan_default_params_t {
+  struct {
+    struct {
+      uint32_t min = 0;
+      uint32_t max = 0;
+    } active;
+    uint32_t passive = 0;
+  } scan_time;
+};
+inline esp_err_t esp_wifi_set_scan_parameters(const wifi_scan_default_params_t *) { return ESP_OK; }
 
 #define WIFI_SCAN_RUNNING -1
 #define WIFI_SCAN_FAILED -2
